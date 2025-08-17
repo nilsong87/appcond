@@ -1,0 +1,38 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-vote-yea"></i> Votação de Assembleia</h2>
+    <form id="form-votacao" class="mb-4">
+        <label class="form-label">Tema: Alteração do regulamento</label>
+        <div>
+            <input type="radio" name="voto" value="Sim" required> Sim
+            <input type="radio" name="voto" value="Não"> Não
+            <input type="radio" name="voto" value="Abstenção"> Abstenção
+        </div>
+        <button type="submit" class="btn btn-success mt-2">Votar</button>
+    </form>
+    <canvas id="graficoVotos" height="100"></canvas>
+</div>
+<script>
+function initVotacoesPage() {
+    let votos = { Sim: 0, Não: 0, "Abstenção": 0 };
+    function renderGrafico() {
+        new Chart(document.getElementById('graficoVotos'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(votos),
+                datasets: [{
+                    data: Object.values(votos),
+                    backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+                }]
+            }
+        });
+    }
+    $('#form-votacao').on('submit', function(e) {
+        e.preventDefault();
+        const voto = $(this).find('[name="voto"]:checked').val();
+        votos[voto]++;
+        renderGrafico();
+        this.reset();
+    });
+    renderGrafico();
+}
+</script>

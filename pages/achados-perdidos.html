@@ -1,0 +1,32 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-search"></i> Achados e Perdidos</h2>
+    <form id="form-achado" class="mb-4" enctype="multipart/form-data">
+        <input type="text" class="form-control mb-2" name="item" placeholder="Item" required>
+        <input type="text" class="form-control mb-2" name="local" placeholder="Local" required>
+        <input type="file" class="form-control mb-2" name="foto" accept="image/*" required>
+        <button type="submit" class="btn btn-info">Registrar</button>
+    </form>
+    <div id="achados-list"></div>
+</div>
+<script>
+function initAchadosPerdidosPage() {
+    $('#form-achado').on('submit', function(e) {
+        e.preventDefault();
+        const item = $(this).find('[name="item"]').val();
+        const local = $(this).find('[name="local"]').val();
+        const foto = this.foto.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            $('#achados-list').append(`
+                <div class="card mb-2"><div class="card-body">
+                    <img src="${ev.target.result}" class="img-thumbnail mb-2" style="max-width:120px;">
+                    <strong>${item}</strong> encontrado em ${local}
+                    <button class="btn btn-sm btn-outline-primary float-end" onclick="showModal('Reivindicar', 'Solicitação enviada!')">Reivindicar</button>
+                </div></div>
+            `);
+        };
+        reader.readAsDataURL(foto);
+        e.target.reset();
+    });
+}
+</script>

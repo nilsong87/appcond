@@ -1,0 +1,27 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-users"></i> Cadastro de Visitante</h2>
+    <form id="form-visitante" class="mb-4">
+        <input type="text" class="form-control mb-2" name="nome" placeholder="Nome do visitante" required>
+        <input type="text" class="form-control mb-2" name="apartamento" placeholder="Apartamento" required>
+        <button type="submit" class="btn btn-primary">Cadastrar & Gerar QR Code</button>
+    </form>
+    <div id="qr-visitante"></div>
+    <div id="visitantes-list"></div>
+</div>
+<script>
+function initVisitantesPage() {
+    $('#form-visitante').on('submit', function(e) {
+        e.preventDefault();
+        const nome = $(this).find('[name="nome"]').val();
+        const apartamento = $(this).find('[name="apartamento"]').val();
+        $('#qr-visitante').html('');
+        new QRCode(document.getElementById('qr-visitante'), `Visitante: ${nome} - Ap: ${apartamento}`);
+        $('#visitantes-list').append(`
+            <div class="card mb-2"><div class="card-body">
+                <strong>${nome}</strong> - Ap. ${apartamento} <span class="badge bg-success">Cadastrado</span>
+            </div></div>
+        `);
+        this.reset();
+    });
+}
+</script>

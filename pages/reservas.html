@@ -1,0 +1,35 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-calendar-check"></i> Reservar Área Comum</h2>
+    <form id="form-reserva" class="mb-4">
+        <select class="form-select mb-2" name="area" required>
+            <option value="">Selecione a área</option>
+            <option>Salão de Festas</option>
+            <option>Churrasqueira</option>
+            <option>Piscina</option>
+        </select>
+        <input type="date" class="form-control mb-2" name="data" required>
+        <input type="text" class="form-control mb-2" name="morador" placeholder="Morador" required>
+        <button type="submit" class="btn btn-primary">Reservar & Pagar PIX</button>
+    </form>
+    <div id="pix-qrcode"></div>
+    <div id="reservas-list"></div>
+</div>
+<script>
+function initReservasPage() {
+    $('#form-reserva').on('submit', function(e) {
+        e.preventDefault();
+        const area = $(this).find('[name="area"]').val();
+        const data = $(this).find('[name="data"]').val();
+        const morador = $(this).find('[name="morador"]').val();
+        // Simula PIX
+        $('#pix-qrcode').html('');
+        new QRCode(document.getElementById('pix-qrcode'), `PIX para reserva: ${area} - ${data} - ${morador}`);
+        $('#reservas-list').append(`
+            <div class="card mb-2"><div class="card-body">
+                <strong>${area}</strong> reservado por ${morador} em ${data} <span class="badge bg-info">Aguardando PIX</span>
+            </div></div>
+        `);
+        this.reset();
+    });
+}
+</script>

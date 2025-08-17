@@ -1,0 +1,26 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-exclamation-triangle"></i> Registrar Ocorrência</h2>
+    <form id="form-ocorrencia" class="mb-4">
+        <input type="text" class="form-control mb-2" name="tipo" placeholder="Tipo" required>
+        <textarea class="form-control mb-2" name="descricao" placeholder="Descrição" required></textarea>
+        <button type="submit" class="btn btn-warning">Registrar</button>
+    </form>
+    <div id="ocorrencias-list"></div>
+</div>
+<script>
+function initOcorrenciasPage() {
+    $('#form-ocorrencia').on('submit', function(e) {
+        e.preventDefault();
+        const tipo = $(this).find('[name="tipo"]').val();
+        const descricao = $(this).find('[name="descricao"]').val();
+        $('#ocorrencias-list').append(`
+            <div class="card mb-2"><div class="card-body">
+                <strong>${tipo}</strong>: ${descricao}
+                <span class="badge bg-secondary">Em análise</span>
+                <button class="btn btn-sm btn-outline-success float-end" onclick="$(this).parent().find('.badge').text('Resolvida').removeClass('bg-secondary').addClass('bg-success')">Resolver</button>
+            </div></div>
+        `);
+        this.reset();
+    });
+}
+</script>

@@ -1,0 +1,35 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-box"></i> Cadastrar Encomenda</h2>
+    <form id="form-encomenda" class="mb-4">
+        <div class="mb-2">
+            <input type="text" class="form-control" name="morador" placeholder="Nome do morador" required>
+        </div>
+        <div class="mb-2">
+            <input type="text" class="form-control" name="descricao" placeholder="Descrição da encomenda" required>
+        </div>
+        <button type="submit" class="btn btn-success">Cadastrar & Enviar WhatsApp</button>
+    </form>
+    <div id="qr-encomenda"></div>
+    <div id="encomendas-list"></div>
+</div>
+<script>
+function initEncomendasPage() {
+    $('#form-encomenda').on('submit', function(e) {
+        e.preventDefault();
+        const morador = $(this).find('[name="morador"]').val();
+        const descricao = $(this).find('[name="descricao"]').val();
+        // Simula envio WhatsApp
+        window.open(`https://wa.me/?text=Olá ${morador}, sua encomenda "${descricao}" chegou!`, '_blank');
+        // Gera QR Code
+        $('#qr-encomenda').html('');
+        new QRCode(document.getElementById('qr-encomenda'), `${morador} - ${descricao}`);
+        // Adiciona à lista
+        $('#encomendas-list').append(`
+            <div class="card mb-2"><div class="card-body">
+                <strong>${morador}</strong> - ${descricao} <span class="badge bg-success">Cadastrada</span>
+            </div></div>
+        `);
+        this.reset();
+    });
+}
+</script>

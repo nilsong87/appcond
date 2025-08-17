@@ -1,0 +1,170 @@
+<div class="container py-4">
+    <h2><i class="fa-solid fa-user-shield"></i> Administração</h2>
+    <!-- Dashboard Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Encomendas</h5>
+                    <p class="card-text fs-2" id="dash-encomendas">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Reservas</h5>
+                    <p class="card-text fs-2" id="dash-reservas">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Ocorrências</h5>
+                    <p class="card-text fs-2" id="dash-ocorrencias">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Visitantes</h5>
+                    <p class="card-text fs-2" id="dash-visitantes">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relatórios e Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Ocorrências</div>
+                <div class="card-body">
+                    <canvas id="graficoOcorrencias" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Reservas</div>
+                <div class="card-body">
+                    <canvas id="graficoReservas" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestão de Ocorrências -->
+    <div class="card mb-4">
+        <div class="card-header">Gestão de Ocorrências</div>
+        <div class="card-body">
+            <table class="table table-hover align-middle" id="tabela-ocorrencias">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ocorrências serão carregadas aqui -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Painel administrativo -->
+    <div class="alert alert-info">
+        Painel administrativo: Gerencie moradores, áreas comuns e configurações do condomínio.
+    </div>
+</div>
+<script>
+function initAdminPage() {
+    // Dados simulados
+    const encomendas = [
+        { morador: "João Silva", data: "2025-08-15", status: "Entregue" },
+        { morador: "Maria Souza", data: "2025-08-16", status: "Aguardando Retirada" }
+    ];
+    const reservas = [
+        { area: "Salão de Festas", morador: "Carlos Lima", data: "2025-08-20" },
+        { area: "Churrasqueira", morador: "Ana Paula", data: "2025-08-22" }
+    ];
+    const ocorrencias = [
+        { tipo: "Barulho", descricao: "Barulho alto no ap. 202", data: "2025-08-16", status: "Em análise" },
+        { tipo: "Manutenção", descricao: "Lâmpada queimada no corredor", data: "2025-08-17", status: "Resolvida" }
+    ];
+    const visitantes = [
+        { nome: "Lucas Pereira", apartamento: "101", data: "2025-08-17" },
+        { nome: "Fernanda Costa", apartamento: "305", data: "2025-08-17" }
+    ];
+
+    // Dashboard
+    $('#dash-encomendas').text(encomendas.length);
+    $('#dash-reservas').text(reservas.length);
+    $('#dash-ocorrencias').text(ocorrencias.length);
+    $('#dash-visitantes').text(visitantes.length);
+
+    // Gráfico de Ocorrências
+    const ocorrenciasPorTipo = ocorrencias.reduce((acc, o) => {
+        acc[o.tipo] = (acc[o.tipo] || 0) + 1;
+        return acc;
+    }, {});
+    new Chart(document.getElementById('graficoOcorrencias'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(ocorrenciasPorTipo),
+            datasets: [{
+                data: Object.values(ocorrenciasPorTipo),
+                backgroundColor: ['#ffc107', '#28a745', '#dc3545', '#007bff']
+            }]
+        }
+    });
+
+    // Gráfico de Reservas
+    const reservasPorArea = reservas.reduce((acc, r) => {
+        acc[r.area] = (acc[r.area] || 0) + 1;
+        return acc;
+    }, {});
+    new Chart(document.getElementById('graficoReservas'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(reservasPorArea),
+            datasets: [{
+                data: Object.values(reservasPorArea),
+                backgroundColor: ['#4cc9f0', '#4361ee', '#3f37c9']
+            }]
+        }
+    });
+
+    // Tabela de Ocorrências
+    const $tbody = $('#tabela-ocorrencias tbody');
+    $tbody.html('');
+    ocorrencias.forEach((o, idx) => {
+        $tbody.append(`
+            <tr>
+                <td>${o.tipo}</td>
+                <td>${o.descricao}</td>
+                <td>${o.data}</td>
+                <td>
+                    <span class="badge ${o.status === 'Resolvida' ? 'bg-success' : 'bg-warning'}">${o.status}</span>
+                </td>
+                <td>
+                    ${o.status !== 'Resolvida' ? `<button class="btn btn-sm btn-success" data-idx="${idx}">Resolver</button>` : ''}
+                </td>
+            </tr>
+        `);
+    });
+
+    // Ação de resolver ocorrência
+    $tbody.on('click', '.btn-success', function() {
+        const idx = $(this).data('idx');
+        ocorrencias[idx].status = 'Resolvida';
+        initAdminPage(); // Recarrega a tabela e dashboard
+        showToast('Ocorrência marcada como resolvida!', 'success');
+    });
+}
+</script>
