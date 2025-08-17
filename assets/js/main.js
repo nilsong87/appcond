@@ -6,9 +6,6 @@ $(document).ready(function() {
     // Load navigation
     loadNavigation();
     
-    // Set up event listeners
-    setupEventListeners();
-    
     // Check authentication
     checkAuth();
 });
@@ -27,6 +24,11 @@ function initApp() {
     
     // Set current year in footer
     $('#current-year').text(new Date().getFullYear());
+    
+    // Set up event listeners after navigation is loaded
+    $(document).on('navigation-loaded', function() {
+        setupEventListeners();
+    });
 }
 
 function loadNavigation() {
@@ -34,51 +36,85 @@ function loadNavigation() {
     $.get('templates/sidebar.html', function(data) {
         $('#sidebar').html(data);
         
-        // Highlight current menu item
-        const currentPage = window.location.hash.substring(1) || 'dashboard';
-        $(`.nav-link[href="#${currentPage}"]`).addClass('active');
-    });
-    
-    // Load top navbar
-    $.get('templates/navbar.html', function(data) {
-        $('.top-navbar').html(data);
-    });
-    
-    // Load bottom nav for mobile
-    if ($(window).width() <= 768) {
-        $.get('templates/bottom-nav.html', function(data) {
-            $('body').append(data);
+        // Load navbar
+        $.get('templates/navbar.html', function(navData) {
+            $('.top-navbar').html(navData);
+            
+            // Trigger event when both navigations are loaded
+            $(document).trigger('navigation-loaded');
+        }).fail(function() {
+            console.error('Failed to load navbar');
         });
-    }
+    }).fail(function() {
+        console.error('Failed to load sidebar');
+    });
 }
 
 function setupEventListeners() {
     // Sidebar toggle for mobile
-    $(document).on('click', '#sidebar-toggle', function() {
-        $('.sidebar').toggleClass('active');
-        $('.main-content').toggleClass('active');
+    $(document).on('click', '#sidebar-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSidebar();
     });
     
+    // Close sidebar when clicking outside
+    $(document).on('click', function(e) {
+        if ($('#sidebar').hasClass('active') && 
+            !$(e.target).closest('#sidebar, #sidebar-toggle').length) {
+            closeSidebar();
+        }
+    });
+    
+    
+    
     // Navigation links
-    $(document).on('click', '.nav-link', function(e) {
+    $(document).on('click', '.nav-link:not([href="#"])', function(e) {
         e.preventDefault();
         const page = $(this).attr('href').substring(1);
         loadPage(page);
+        closeSidebar(); // Close sidebar after navigation on mobile
     });
     
     // Logout button
-    $(document).on('click', '#logout-btn', function() {
+    $(document).on('click', '#logout-btn', function(e) {
+        e.preventDefault();
         logout();
     });
 }
 
+function toggleSidebar() {
+    $('#sidebar').toggleClass('active');
+    $('.main-content').toggleClass('active');
+    toggleSidebarIcon();
+    
+    // Add overlay when sidebar is active
+    if ($('#sidebar').hasClass('active')) {
+        $('body').append('<div class="sidebar-overlay"></div>');
+        $('.sidebar-overlay').on('click', closeSidebar);
+    } else {
+        $('.sidebar-overlay').remove();
+    }
+}
+
+function closeSidebar() {
+    $('#sidebar').removeClass('active');
+    $('.main-content').removeClass('active');
+    $('#sidebar-icon').removeClass('fa-times').addClass('fa-bars');
+    $('.sidebar-overlay').remove();
+}
+
+function toggleSidebarIcon() {
+    const icon = $('#sidebar-icon');
+    icon.toggleClass('fa-bars fa-times');
+}
+
 function checkAuth() {
-    // Check if user is logged in
     const token = localStorage.getItem('condapp_token');
-    if (!token && window.location.hash !== '#login') {
+    if (!token && !['#login', '#register'].includes(window.location.hash)) {
         window.location.hash = 'login';
         loadPage('login');
-    } else if (token && (window.location.hash === '#login' || window.location.hash === '')) {
+    } else if (token && ['#login', '#register', ''].includes(window.location.hash)) {
         window.location.hash = 'dashboard';
         loadPage('dashboard');
     } else if (!token) {
@@ -89,6 +125,8 @@ function checkAuth() {
 }
 
 function loadPage(page) {
+    if (!page) return;
+    
     // Show loading indicator
     $('#main-content-area').html(`
         <div class="text-center py-5">
@@ -157,7 +195,6 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
-// Global function to show modal
 function showModal(title, content, size = '') {
     const modalId = `modal-${Date.now()}`;
     const modalHtml = `
